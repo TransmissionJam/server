@@ -37,7 +37,7 @@ const startGame = function (namespace) {
 
 var http = require('http');
 var server = http.createServer();
-server.listen(50001, '0.0.0.0');
+server.listen(50007, '0.0.0.0');
 var socket = io.listen(server);
 
 io.listen(50007);
