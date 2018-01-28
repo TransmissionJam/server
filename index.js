@@ -40,4 +40,4 @@ var server = http.createServer();
 server.listen(50001, '0.0.0.0');
 var socket = io.listen(server);
 
-io.listen(50001);
+io.listen(50007);
