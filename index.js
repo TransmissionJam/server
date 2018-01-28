@@ -35,4 +35,9 @@ const startGame = function (namespace) {
     nsp.emit('hi', 'everyone!');
 };
 
+var http = require('http');
+var server = http.createServer();
+server.listen(50001, '0.0.0.0');
+var socket = io.listen(server);
+
 io.listen(50001);
