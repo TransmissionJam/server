@@ -1,0 +1,119 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+    <link rel="stylesheet" href="http://cdn.rawgit.com/necolas/normalize.css/master/normalize.css">
+    <link rel="stylesheet" href="http://cdn.rawgit.com/milligram/milligram/master/dist/milligram.min.css">
+    <script src="https://unpkg.com/vue@2.5.13/dist/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+</head>
+
+<body>
+    <div class="container" id="game">
+        <div class="row">
+            <div class="column column-50 column-offset-25">
+                <form>
+                    <fieldset>
+                        <label for="nickname">Nickname</label>
+                        <input id="nickname" type="text" :value="nickname" @input="updateNickname">
+                    </fieldset>
+                </form>
+                <div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Room</th>
+                                <th>Players</th>
+                                <th>Who vs who?</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="room in rooms">
+                                <td>{{ room.name }}</td>
+                                <td>{{ room.players.length }}</td>
+                                <td>
+                                    <div v-if="room.players[1]">
+                                        {{ room.players[0].nickname }} vs {{ room.players[1].nickname }}
+                                    </div>
+                                    <div v-else>
+                                        <span v-if="emptyNickname">--</span>
+                                        <span v-else>
+                                            <a href="#" v-on:click="join(room.name)">Me</a>
+                                        </span>
+                                        vs {{ room.players[0].nickname }}
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <fieldset>
+                    <label for="nickname">Room Name</label>
+                    <input id="room" type="text" :value="room" @input="updateRoom">
+                    <input class="button-primary" value="Create Room" type="submit" v-on:click="create" :disabled="emptyNickname || emptyRoomName">
+                </fieldset>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io('http://localhost:3000');
+
+        socket.on('update rooms', function (rooms) {
+            game.rooms = rooms;
+        });
+
+        socket.on('start game', function(location) {
+            window.location = location;
+        });
+
+        const game = new Vue({
+            el: '#game',
+            data: {
+                nickname: '',
+                room: '',
+                rooms: []
+            },
+            computed: {
+                emptyNickname: function () {
+                    return this.nickname.trim() === '';
+                },
+                emptyRoomName: function () {
+                    return this.room.trim() === '';
+                }
+            },
+            methods: {
+                join: function (roomName) {
+                    socket.emit('join room', {
+                        roomName: roomName,
+                        player: {
+                            nickname: this.nickname,
+                            socket: socket.id
+                        }
+                    });
+                },
+                updateNickname: function (e) {
+                    this.nickname = e.target.value;
+                },
+                create: function () {
+                    socket.emit('new room', {
+                        name: this.room,
+                        players: [
+                            {
+                                nickname: this.nickname,
+                                socket: socket.id
+                            }
+                        ]
+                    });
+
+                    this.room = '';
+                },
+                updateRoom: function (e) {
+                    this.room = e.target.value;
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
