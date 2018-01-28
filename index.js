@@ -19,7 +19,7 @@ io.on('connection', function (socket) {
         rooms.find(room => room.name === req.roomName).players.unshift(req.player);
         io.sockets.emit('update rooms', rooms.filter(room => room.players.length < maxPlayers));
         socket.join(req.roomName);
-        io.in(req.roomName).emit('start game', `http://jam.xaq.space:50000?nps=${req.roomName}`);
+        io.in(req.roomName).emit('start game', `${req.roomName}`);
 
         startGame(req.roomName);
     });
@@ -35,4 +35,4 @@ const startGame = function (namespace) {
     nsp.emit('hi', 'everyone!');
 };
 
-io.listen(3000);
+io.listen(50001);
