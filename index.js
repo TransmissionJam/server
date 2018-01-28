@@ -20,9 +20,19 @@ io.on('connection', function (socket) {
         io.sockets.emit('update rooms', rooms.filter(room => room.players.length < maxPlayers));
         socket.join(req.roomName);
         io.in(req.roomName).emit('start game', `http://jam.xaq.space:50000?nps=${req.roomName}`);
-    });
 
+        startGame(req.roomName);
+    });
 });
 
+const startGame = function (namespace) {
+    const nsp = io.of('/' + namespace);
+
+    nsp.on('connection', function (socket) {
+        console.log('someone connected');
+    });
+
+    nsp.emit('hi', 'everyone!');
+};
 
 io.listen(3000);
